@@ -1,24 +1,30 @@
-const { Sequelize, Model, DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
-
-const sequelize = new Sequelize('db', 'user', 'password', {
-    host: 'host',
-    port: 5432,
-    dialect: 'postgres'
-})
-
-class User extends Model {}
-
-User.init({
-  email: DataTypes.TEXT,
-  password: DataTypes.TEXT
-}, { sequelize, modelName: 'user', freezeTableName: true});
+const User = require('./models/user.js');
+const Activity = require('./models/activity.js');
+const ActivityLog = require('./models/activityLog.js');
+const sequelize = require('./db.js')
 
 sequelize.sync()
   .then(() => User.create({
-    email: 'janedoe',
+    email: 'janedoe6@hehehehe.com',
     password: bcrypt.hashSync("password", 8)
   }))
   .then(jane => {
     console.log(jane.toJSON());
-  });
+    console.log("ID: " + jane.toJSON().id);
+
+    return Activity.create({
+      userID: jane.toJSON().id,
+      name: 'Test Activity Jane5'
+    })
+  })
+  .then(activity => {
+    console.log(activity.toJSON());
+
+    return ActivityLog.create({
+      activityID: activity.toJSON().id,
+      timeStart: new Date(),
+      duration: 31
+    })
+  })
+  .then(actLog => console.log(actLog.toJSON()));
